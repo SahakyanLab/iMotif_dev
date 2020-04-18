@@ -1,0 +1,72 @@
+################################################################################
+# A. Use Optimus to optimise the coefficients of G4Hunter for estimating i-motif
+# stability based on melting temperature (Tm) and pH at mid-transition (pHt)
+################################################################################
+DEFINITION:
+Similar to the definition of melting temperature, pHt refers to pH in which 
+50% of the sequences have already formed i-motifs.
+
+DATA:
+* DATA contains the DATA.txt and the function to calculate HunterScore for i-motif
+DATA.txt (196 sequences in total)
+Name	Sequence	pHt	Tm
+T111-3	CCCTCCCTCCCTCCC	6.22	57.8
+T222-3	CCCTTCCCTTCCCTTCCC	6.16	53.2
+T333-3	CCCTTTCCCTTTCCCTTTCCC	6.22	56.9
+T444-3	CCCTTTTCCCTTTTCCCTTTTCCC	6.27	58.8
+T112-3	CCCTCCCTCCCTTCCC	6.11	53.5
+All sequences start with C run. Since the number of runs (same base blocks) per
+sequence is constantly 7, all sequences end with C run too (C-T-C-T-C-T-C). 
+
+PROBLEM: Optimise the coefficients of G4Hunter for estimating i-motifstability. The 
+coefficients refer to the multiplier for each run length. In G4Hunter, multiplier
+is equal to length of runs such that multiplier for G is 1, GG=2, GGG=3, GGGG and 
+longer=4. Cs get same scores but negated (e.g. CC=-2). For the i-motif, Optimus will 
+be used to determine the best scoring per run length (C=positive base, T=negative base). 
+In G4Hunter, the max score applies to length 4 and above. For i-motif, the boundary
+is set to 6 because the maximum run length of the sequences is 6. 
+
+OPTIMUS:
+Same parameters were used for both outcome variable.
+Optimus(NCPU=3 
+        SEED=840,
+        DATA=DATA*,
+        K.INITIAL=c(k1=1, k2=2, k3=3, k4=4, k5=5, k6=6) ,
+        rDEF=r,
+        mDEF=m,
+        uDEF=u,
+        OPT.TYPE="SA",
+        OPTNAME=paste0(opt.type, "_i-motif_Hunter"),
+        NUMITER=1e6,                                                   
+        CYCLES=4,
+        DUMP.FREQ=1e5,
+        LONG=TRUE)
+
+K.INITIAL: There will be 6 starting coefficients, 1:6 (multipliers of G4Hunter) 
+because the max run length is 6.
+O: Calculated by m() is the correlation coefficient of Tm/pHt vs. i-motif HunterScore
+r(): Every iteration, the K vector containing the coefficients is altered by randomly 
+picking a coefficient to vary by -0.1 or 0.1 (randomly picked too). If the 
+coefficient becomes negative, it is set to 0. 
+################################################################################
+# B. Test other scoring schemes wherein Ts are scored 0
+################################################################################
+TradG4. Traditional G4-Hunter: give +1, +2, +3 or +4 to each cytosine in a run of
+1, 2, 3 or 4+ consecutive C and a score of 0 to all T. (not negative)
+
+ExtG4. Extended G4-Hunter: give +1, +2, +3, +4, +5, +6to each cytosine in a run 
+of 1, 2, 3, 4, 5 or 6+ consecutive C and a score of 0 to all T. (not negative)
+
+OptG4. Optimized G4-hunter: give +w, +x, +y or +z to each cytosine in a run of 
+1, 2, 3 or 4 (with w, x, y, z positive decimal numbers and w<x<y<z) consecutive C 
+and a score of 0 to all T. (not negative)
+
+OptExt4. Optimized+Extended G4-hunter: give +u +v +w, +x, +y or +z to each cytosine
+in a run of 1, 2, 3, 4, 5, 6+ (with u, v, w, x, y, z positive decimal numbers and 
+u<v<w<x<y<z) consecutive C and a score of 0 to all T. (not negative)
+################################################################################
+LOG
+
+17/12/2019 - added pHt run and analyses
+17/11/2019 - written
+28/01/2020 - suggested testing of other scoring schemes (not negating T)

@@ -1,0 +1,61 @@
+################################################################################
+# Use Eureqa to develop a model predicting Tm of i-motifs
+################################################################################
+Formula building blocks:
+BE - Basic (constant, input variable, ±, x, ÷) and Exponential (power, sqrt)
+BTE - BE and Trigonometry (sine, cosine)
+
+Error metric: Absolute error (default)
+
+Data splitting: Treat all data points equally (default)
+- How it's done: (1) shuffle all rows first then split into training and data,
+as to how they split:
+Based here: http://formulize.nutonian.com/forum/discussion/632/data-splitting/p1
+"If there are less than 50 rows, the entire data set is used for training and 
+validation. If there are less than 150 rows the entire data set is used for 
+training. We would prefer not to share the details of how the fractions are 
+calculated other than to say it is dependent on the number of input rows. 
+You can specify exactly how many rows to use for training and for validation 
+using the custom data split setting which hopefully should be sufficient for any 
+of your needs."
+
+Runs:
+Features are C, T1, T2, T3, length. Scaled run means predictors (not the outcome)
+were subtracted by the mean and divided by the standard deviation using the 
+eureqa built-in function.
+
+a. Tm - BE (unscaled), BE (centered and scaled), BTE (unscaled)
+
+
+Result:
+a. Tm
+The observed vs. predicted plot is based on one model from the iMotif_chosen_BE.fxp 
+(unscaled features) and then applied on i-motif data split into training (80%) 
+and (20%) exactly the same way as in xgbTree. The metric is calculated on test 
+data only as in xgbTree. 
+
+With features unscaled, length only appeared in the 2nd least accurate model  
+(Tm=42.3 + length). After centering and scaling, it did appear but only in more 
+complex models, complexity>27 (sample model has complexity=14).
+
+b. pHt
+Note that eureqa thinks that pHt has a large offset and has to be normalised
+
+################################################################################
+# Eureqa info
+################################################################################
+"stability" refers to how long the solution list hasn't changed
+"maturity" relates to how much computational effort has been put into the 
+current listed solutions.
+Reference: https://groups.google.com/forum/#!topic/eureqa-group/Y0sMsR_pEGQ
+
+Search can be then duplicated by seeding the search with prior solutions 
+Reference: http://formulize.nutonian.com/forum/discussion/202#Item_7
+################################################################################
+
+LOG
+
+16/12/2019 - add Formula building blocks and result when outcome variable is 
+pHt
+
+25/11/2019 - written
