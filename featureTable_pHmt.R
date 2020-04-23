@@ -81,7 +81,6 @@ identical(feat.df$C1, feat.df$C2, feat.df$C3, feat.df$C4)
 feat.df <- feat.df[, -(which(colnames(feat.df)%in%c("C2", "C3", "C4")))]
 
 #-------------------
-
 write.csv(feat.df, file=paste0(out.dir, "/DATA_feat.csv"),
           row.names=FALSE)
 

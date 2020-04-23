@@ -1,13 +1,14 @@
 ################################################################################
-# Use Eureqa to develop a model predicting Tm of i-motifs
+# Use Eureqa to develop a model for predicting i-motif stability based on melting
+temperature (Tm) and pH at mid-transition (pHt)
 ################################################################################
-Formula building blocks:
-BE - Basic (constant, input variable, ±, x, ÷) and Exponential (power, sqrt)
+1. GENERAL
+a. Formula building blocks:
+B - Basic (constant, input variable, ±, x, ÷)
+BE - B and Exponential (power, sqrt)
 BTE - BE and Trigonometry (sine, cosine)
-
-Error metric: Absolute error (default)
-
-Data splitting: Treat all data points equally (default)
+b. Error metric: Absolute error (default)
+c. Data splitting: Treat all data points equally (default)
 - How it's done: (1) shuffle all rows first then split into training and data,
 as to how they split:
 Based here: http://formulize.nutonian.com/forum/discussion/632/data-splitting/p1
@@ -19,28 +20,41 @@ You can specify exactly how many rows to use for training and for validation
 using the custom data split setting which hopefully should be sufficient for any 
 of your needs."
 
-Runs:
+Note that all sequences were fed to Eureqa and splitting into training and
+test was done internally by Eureqa and there's no way to retrieve data on 
+splitting. It was wrong to generate plots using the Eureqa model on 
+test data same with GBM because Eureqa might have used GBM's test data as training.
+I should've initially splitted sequences into test and training and did all 3
+approaches only on training and validated with the test so I can compare
+three approaches. Although it is not so important to compare the 3 approaches
+anyway. 
+
+d. Runs:
 Features are C, T1, T2, T3, length. Scaled run means predictors (not the outcome)
 were subtracted by the mean and divided by the standard deviation using the 
-eureqa built-in function.
+eureqa built-in function. Scaling was done manually (not using Eureqa)
+e. Plot:
+Chosen models were tested on test data (splitting identical to GBM). 
+Splitting done by:
+set.seed(825), all 196 sequences shuffled once then 80% training data randomly 
+selected with the rest (20%) becoming test data. In the plot, equation and
+correlation calculated on test data only as in GBM's. 
 
-a. Tm - BE (unscaled), BE (centered and scaled), BTE (unscaled)
-
-
-Result:
-a. Tm
-The observed vs. predicted plot is based on one model from the iMotif_chosen_BE.fxp 
-(unscaled features) and then applied on i-motif data split into training (80%) 
-and (20%) exactly the same way as in xgbTree. The metric is calculated on test 
-data only as in xgbTree. 
-
-With features unscaled, length only appeared in the 2nd least accurate model  
+2. RESULTS
+a. Tm 
+- BE (with/without scaling), BTE (with scaling).
+- The chosen model is from the iMotif_chosen_BE.fxp (unscaled), complexity=14.
+It uses all features except length. 
+- With features unscaled, length only appeared in the 2nd least accurate model  
 (Tm=42.3 + length). After centering and scaling, it did appear but only in more 
-complex models, complexity>27 (sample model has complexity=14).
+complex models, complexity>27. 
 
 b. pHt
-Note that eureqa thinks that pHt has a large offset and has to be normalised
-
+- B (with/without scaling), BE (with/without scaling)
+- Note that eureqa thinks that pHt has a large offset and has to be normalised.
+- The chosen model is from the iMotif_pHt_BE.fxp (unscaled), complexity=13. 
+C and T2 features only. More complex equations were also obtained using C-tract 
+and all 3 loop lengths.
 ################################################################################
 # Eureqa info
 ################################################################################
@@ -52,10 +66,3 @@ Reference: https://groups.google.com/forum/#!topic/eureqa-group/Y0sMsR_pEGQ
 Search can be then duplicated by seeding the search with prior solutions 
 Reference: http://formulize.nutonian.com/forum/discussion/202#Item_7
 ################################################################################
-
-LOG
-
-16/12/2019 - add Formula building blocks and result when outcome variable is 
-pHt
-
-25/11/2019 - written

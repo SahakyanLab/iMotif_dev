@@ -1,14 +1,47 @@
 ################################################################################
-# A. Use Optimus to optimise the coefficients of G4Hunter for estimating i-motif
+# A. Use Optimus to optimise the coefficients of G4Hunter for predicting i-motif
 # stability based on melting temperature (Tm) and pH at mid-transition (pHt)
 ################################################################################
 DEFINITION:
 Similar to the definition of melting temperature, pHt refers to pH in which 
 50% of the sequences have already formed i-motifs.
 
-DATA:
-* DATA contains the DATA.txt and the function to calculate HunterScore for i-motif
-DATA.txt (196 sequences in total)
+1. Optimisation
+PROBLEM: 
+Modify the G4Hunter algorithm to make it applicable for i-motifs. 
+In G4Hunter, one G has a score of 1; in a GG tract, each G is scored 2, in a GGG 
+tract, each G is scored 3 and in a GGGG or longer tract, each G is scored 4.
+C’s get the same score but negated. To make G4Hunter applicable for the CT-based 
+i-motifs, Optimus will be used to find the optimum scoring for each C (positive 
+base, counterpart of G in the case of G-quadruplexes) in a given C-tract length 
+(e.g. the score of each C in a CC tract in an i-motif). Two ways will be tried 
+to score T; (1) T treated as negative base such that it’s given the same score 
+as C but negated (2) T treated as the other bases (A, G) such that it’s scored 0.
+For i-motif, we tried both 4 (trad for traditional G4Hunter) and 
+6 (ext for extended G4Hunter) as maximum scores. We tried 6 because the maximum 
+run length of the i-motif sequences is 6. 
+
+The approaches tried therefore are:
+a. tradG4. Traditional G4Hunter: give +1, +2, +3 or +4 to each cytosine in a run of
+1, 2, 3 or 4+ consecutive C. 
+
+b. extG4. Extended G4Hunter: give +1, +2, +3, +4, +5, +6 to each cytosine in a run 
+of 1, 2, 3, 4, 5 or 6+ consecutive C.
+
+c. tradOpti. Traditional Optimized G4Hunter: give +u +v +w or +x to each cytosine 
+in a run of 1, 2, 3 or 4 (with u, v, w, x being positive decimal numbers and u<v<w<x) 
+consecutive C. 
+
+d. extOpti. Extended Optimized G4Hunter: give +u +v +w, +x, +y or +z to each cytosine
+in a run of 1, 2, 3, 4, 5, 6+ (with u, v, w, x, y, z beingpositive decimal numbers and 
+u<v<w<x<y<z) consecutive C.
+
+All 4 approaches were done when T is treated as a negative and treated as the rest of the
+bases (score=0). 
+
+DATA object contains:
+a. Table from ./DATA.txt (196 sequences in total), Name, Sequence and
+pHt/Tm (depending on the target parameter in the script) columns.
 Name	Sequence	pHt	Tm
 T111-3	CCCTCCCTCCCTCCC	6.22	57.8
 T222-3	CCCTTCCCTTCCCTTCCC	6.16	53.2
@@ -17,21 +50,16 @@ T444-3	CCCTTTTCCCTTTTCCCTTTTCCC	6.27	58.8
 T112-3	CCCTCCCTCCCTTCCC	6.11	53.5
 All sequences start with C run. Since the number of runs (same base blocks) per
 sequence is constantly 7, all sequences end with C run too (C-T-C-T-C-T-C). 
-
-PROBLEM: Optimise the coefficients of G4Hunter for estimating i-motifstability. The 
-coefficients refer to the multiplier for each run length. In G4Hunter, multiplier
-is equal to length of runs such that multiplier for G is 1, GG=2, GGG=3, GGGG and 
-longer=4. Cs get same scores but negated (e.g. CC=-2). For the i-motif, Optimus will 
-be used to determine the best scoring per run length (C=positive base, T=negative base). 
-In G4Hunter, the max score applies to length 4 and above. For i-motif, the boundary
-is set to 6 because the maximum run length of the sequences is 6. 
+b. HunterScore() to calculate i-motif score.
+c. neg.base - "T" (score for T is negative counterpart of C while score is 0 for the rest
+of the bases) or NULL (score for all bases except C is 0). 
 
 OPTIMUS:
 Same parameters were used for both outcome variable.
 Optimus(NCPU=3 
         SEED=840,
         DATA=DATA*,
-        K.INITIAL=c(k1=1, k2=2, k3=3, k4=4, k5=5, k6=6) ,
+        K.INITIAL=c(k1=1, k2=2, k3=3, k4=4)/c(k1=1, k2=2, k3=3, k4=4, k5=5, k6=6) ,
         rDEF=r,
         mDEF=m,
         uDEF=u,
@@ -39,34 +67,19 @@ Optimus(NCPU=3
         OPTNAME=paste0(opt.type, "_i-motif_Hunter"),
         NUMITER=1e6,                                                   
         CYCLES=4,
-        DUMP.FREQ=1e5,
+        DUMP.FREQ=5e4,
         LONG=TRUE)
 
-K.INITIAL: There will be 6 starting coefficients, 1:6 (multipliers of G4Hunter) 
-because the max run length is 6.
+K.INITIAL: Starting coefficients (multiplier) for traditional is 1:4,
+1:6 for extended.  
 O: Calculated by m() is the correlation coefficient of Tm/pHt vs. i-motif HunterScore
 r(): Every iteration, the K vector containing the coefficients is altered by randomly 
 picking a coefficient to vary by -0.1 or 0.1 (randomly picked too). If the 
-coefficient becomes negative, it is set to 0. 
+coefficient becomes negative, it is set to 0. Then the K is arranged in increasing
+order. 
+
+2. Plot
+Plot the scores from the scores from the 4 approaches vs. the actual Tm/pHt value.
+This is done for when T (negT) is negated or scored 0 (zeroT). 
+Linear equation and R measured using all datapoints. 
 ################################################################################
-# B. Test other scoring schemes wherein Ts are scored 0
-################################################################################
-TradG4. Traditional G4-Hunter: give +1, +2, +3 or +4 to each cytosine in a run of
-1, 2, 3 or 4+ consecutive C and a score of 0 to all T. (not negative)
-
-ExtG4. Extended G4-Hunter: give +1, +2, +3, +4, +5, +6to each cytosine in a run 
-of 1, 2, 3, 4, 5 or 6+ consecutive C and a score of 0 to all T. (not negative)
-
-OptG4. Optimized G4-hunter: give +w, +x, +y or +z to each cytosine in a run of 
-1, 2, 3 or 4 (with w, x, y, z positive decimal numbers and w<x<y<z) consecutive C 
-and a score of 0 to all T. (not negative)
-
-OptExt4. Optimized+Extended G4-hunter: give +u +v +w, +x, +y or +z to each cytosine
-in a run of 1, 2, 3, 4, 5, 6+ (with u, v, w, x, y, z positive decimal numbers and 
-u<v<w<x<y<z) consecutive C and a score of 0 to all T. (not negative)
-################################################################################
-LOG
-
-17/12/2019 - added pHt run and analyses
-17/11/2019 - written
-28/01/2020 - suggested testing of other scoring schemes (not negating T)

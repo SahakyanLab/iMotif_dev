@@ -1,0 +1,26 @@
+nohup: ignoring input
+[1] ##################################################
+[1] NOTE: Model tuning for the data /home/ltamon/DPhil/Collaboration/iMotif_Opt/out_featureTable/DATA_feat.csv
+[1] NOTE: fitname - FIT_GBM_2
+[1] NOTE: SEED - 825
+[1] NOTE: Number of CPUs used  - 2
+[1] NOTE: Machine learning method used - GBM (xgbTree)
+[1] NOTE: Validation scheme - 5-fold CV
+[1] NOTE:                      repeated 3 times.
+[1] NOTE: CenterScaling - TRUE
+[1] ##################################################
+[1] Training with all data.
+          used  (Mb) gc trigger  (Mb) max used  (Mb)
+Ncells 1882985 100.6    3654965 195.2  2638190 140.9
+Vcells 3128075  23.9    8388608  64.0  4496274  34.4
+[1] Predictors centered and scaled w.r.t. mean and sd.
+null device 
+          1 
+[1] NOTE: Model fitting...
+          used  (Mb) gc trigger  (Mb) max used  (Mb)
+Ncells 2016353 107.7    3654965 195.2  3654965 195.2
+Vcells 3520806  26.9    8388608  64.0  7354857  56.2
+[1] NOTE: Saving the results for the first level.
+          used  (Mb) gc trigger  (Mb) max used  (Mb)
+Ncells 2016404 107.7    3654965 195.2  3654965 195.2
+Vcells 3520837  26.9    8388608  64.0  7354857  56.2
