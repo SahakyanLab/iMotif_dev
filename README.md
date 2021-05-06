@@ -1,5 +1,6 @@
 # iMotif_dev
 Data and scripts for the iMotif stability predictions in a restricted C/T space of possible sequences.
+See the README files within the subfolders for further details on the performed calculations.
 
 The usage of the code should be accompanied with the following citations:
 
