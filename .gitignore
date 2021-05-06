@@ -1,11 +1,6 @@
 *~
 
-# Directories
-manuscript/
-feedback/
-ppt/
-
-# Some OS specific tmp files
+# Some OS specific tmp files 
 *.DS_Store
 
 # History files
@@ -44,3 +39,6 @@ vignettes/*.pdf
 
 # Ignore these directories inlcuding all files within
 z_ignore_git/
+manuscript/
+feedback/
+ppt/
