@@ -1,5 +1,12 @@
+*~
+
+# Directories
+manuscript/
+feedback/
+ppt/
+
 # Some OS specific tmp files
-.DS_Store
+*.DS_Store
 
 # History files
 .Rhistory
@@ -12,7 +19,7 @@
 .Ruserdata
 
 # Output files from R CMD check
-/*.Rcheck/
+*.Rcheck/
 
 # RStudio files
 .Rproj.user/
