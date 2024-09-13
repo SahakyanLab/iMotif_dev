@@ -69,8 +69,8 @@ length as features yielded the same optimal set of hyperparameters:
 37    1000         4 0.01     0                1                5       0.6
 
 Ranking of feature importance:
-All: C-T3-T2-T1
-No length: C-length-T3-T1-T2
+All: C-length-T3-T1-T2
+No length: C-T3-T2-T1
 
 Both models (with and without length) were then further tuned using 80% of 
 training data and then validated with the 20%. 
